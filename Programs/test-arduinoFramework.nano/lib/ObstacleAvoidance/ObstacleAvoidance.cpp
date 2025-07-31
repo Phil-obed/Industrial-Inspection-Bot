@@ -1,123 +1,80 @@
-#include <Arduino.h>
-#include <MotorControl_L293D.hpp>
+#include "ObstacleAvoidance.hpp"
 
-
-#define STOP    0b0000
-#define FORWARD 0b1010
-#define REVERSE 0b0101
-#define LEFT    0b1001
-#define RIGHT   0b0110
-
-Bot::Bot(uint8_t Rf, uint8_t Rb, uint8_t Lf, uint8_t Lb, uint8_t enR, uint8_t enL)
-{
-    motorPins[0] = Rf;
-    motorPins[1] = Rb;
-    motorPins[2] = Lf;
-    motorPins[3] = Lb;
-
-    _enR = enR;
-    _enL = enL;
-
-    _current_Speed = 0;
-    _target_Speed = 0;
-    _ramp_Step = 0;
-    _ramp_Interval = 10;
-    _last_UpdatedT = 0;
-    _current_Pattern = STOP;
+ObstacleAvoidance::ObstacleAvoidance(Bot* bot,
+                                     uint8_t trigFL, uint8_t echoFL,
+                                     uint8_t trigFC, uint8_t echoFC,
+                                     uint8_t trigFR, uint8_t echoFR) {
+    _bot = bot;
+    sensors[FL] = { trigFL, echoFL, 400.0, 0, false };
+    sensors[FC] = { trigFC, echoFC, 400.0, 0, false };
+    sensors[FR] = { trigFR, echoFR, 400.0, 0, false };
 }
 
-void Bot::init(){
-    // declares chosen pins io status
-    pinMode(_enR, OUTPUT);
-    pinMode(_enL, OUTPUT);
-
-    for (uint8_t i = 0; i < 4; i++)
-    {
-        pinMode(motorPins[i], OUTPUT); // set all motor pins as output
-    }
-    stop(0);
-}
-
-void Bot::move(uint8_t pattern)
-{
-    _current_Pattern = pattern;
-
-    for (uint8_t i = 0; i < 4; i++)
-    {
-        bool state = (_current_Pattern >> (3 - i)) & 0x01; //checks if the LSB(least significant bit) is 1
-        digitalWrite(motorPins[i], state ? HIGH : LOW);    // assigns state as HIGH or LOW to motor pins based on pattern
+void ObstacleAvoidance::begin() {
+    for (int i = 0; i < 3; i++) {
+        pinMode(sensors[i].trig, OUTPUT);
+        pinMode(sensors[i].echo, INPUT);
+        digitalWrite(sensors[i].trig, LOW);
     }
 }
 
-void Bot::updateSpeed()
-{
-    unsigned long now = millis();
-    if (now - _last_UpdatedT >= _ramp_Interval)
-    {
-        _last_UpdatedT = now;
-
-        if (_current_Speed < _target_Speed)
-        {
-            _current_Speed += _ramp_Step;
-            if (_current_Speed > _target_Speed)
-                _current_Speed = _target_Speed;
-        }
-        else if (_current_Speed > _target_Speed)
-        {
-            _current_Speed -= _ramp_Step;
-            if (_current_Speed < _target_Speed)
-                _current_Speed = _target_Speed;
-        }
-
-        analogWrite(_enR, _current_Speed);
-        analogWrite(_enL, _current_Speed);
-    }
+void ObstacleAvoidance::triggerSensor(Sensor& sensor) {
+    digitalWrite(sensor.trig, LOW);
+    delayMicroseconds(2);
+    digitalWrite(sensor.trig, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(sensor.trig, LOW);
+    sensor.startTime = micros();
+    sensor.triggered = true;
 }
 
-void Bot::stop(uint8_t rampStep) {
-    if (rampStep == 0) {
-        // Hard stop; cuts speed and PWM immediately
-        _target_Speed = 0;
-        _current_Speed = 0;
-        analogWrite(_enR, 0);
-        analogWrite(_enL, 0);
-        move(STOP);
+void ObstacleAvoidance::readEcho(Sensor& sensor) {
+    if (!sensor.triggered) return;
+
+    unsigned long duration = pulseIn(sensor.echo, HIGH, _sensorTimeout);
+    if (duration == 0) {
+        sensor.distance = 400.0;  // No echo = assume clear
     } else {
-        // Soft stop; ramp down
-        _ramp_Step = rampStep;
-        _target_Speed = 0;
-        move(STOP);
+        sensor.distance = duration * 0.0343 / 2.0;
     }
+
+    sensor.triggered = false;
 }
 
-void Bot::forward(uint8_t accSpeed, uint8_t speed)
-{
-    _ramp_Step = accSpeed;
-    _target_Speed = speed;
-    move(FORWARD);
-    updateSpeed();
-}
+void ObstacleAvoidance::update() {
+    unsigned long now = millis();
 
-void Bot::reverse(uint8_t accSpeed, uint8_t speed)
-{
-    _ramp_Step = accSpeed;
-    _target_Speed = speed;
-    move(REVERSE);
-    updateSpeed();
-}
+    // 1. Fire one sensor per cycle (non-blocking pulse)
+    if (!_lastStateUpdate || now - _lastStateUpdate >= _sensorCycleDelay) {
+        readEcho(sensors[_currentSensor]);           // read previous sensor
+        _currentSensor = (_currentSensor + 1) % 3;    // next sensor
+        triggerSensor(sensors[_currentSensor]);       // fire next sensor
+        _lastStateUpdate = now;
+    }
 
-void Bot::left(uint8_t accSpeed, uint8_t speed)
-{
-    _ramp_Step = accSpeed;
-    _target_Speed = speed;
-    move(LEFT);
-    updateSpeed();
-}
+    // 2. Decision logic
+    float dFL = sensors[FL].distance;
+    float dFC = sensors[FC].distance;
+    float dFR = sensors[FR].distance;
 
-void Bot::right(uint8_t accSpeed, uint8_t speed)
-{
-    _ramp_Step = accSpeed;
-    _target_Speed = speed;
-    move(RIGHT);
-    updateSpeed();
+    if (dFC < STOP_DIST) {
+        _bot->stop(5);
+        if (dFL > dFR && dFL > AVOID_DIST) {
+            _bot->left(_accStep, _speed);
+        } else if (dFR > AVOID_DIST) {
+            _bot->right(_accStep, _speed);
+        } else {
+            _bot->reverse(_accStep, _speed / 2);
+        }
+    }
+    else if (dFL < AVOID_DIST || dFR < AVOID_DIST) {
+        if (dFL < dFR) {
+            _bot->right(_accStep, _speed);
+        } else {
+            _bot->left(_accStep, _speed);
+        }
+    }
+    else {
+        _bot->forward(_accStep, _speed);
+    }
 }
