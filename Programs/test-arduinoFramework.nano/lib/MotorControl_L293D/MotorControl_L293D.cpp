@@ -2,11 +2,11 @@
 #include "MotorControl_L293D.hpp"
 
 
-#define STOP    B0000
-#define FORWARD B1010
-#define REVERSE B0101
-#define LEFT    B1001
-#define RIGHT   B0110
+#define STOP    0b0000
+#define FORWARD 0b1010
+#define REVERSE 0b0101
+#define LEFT    0b1001
+#define RIGHT   0b0110
 
 Bot::Bot(uint8_t Rf, uint8_t Rb, uint8_t Lf, uint8_t Lb, uint8_t enR, uint8_t enL)
 {
