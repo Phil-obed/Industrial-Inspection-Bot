@@ -1,38 +1,64 @@
 #include <Arduino.h>
-#include "MotorControl_L293D.hpp"
+#include "Mototr"
+#define Rf 23
+#define Rb 22
+#define enR 21
 
-
-#define Rf 13
-#define Rb 12
-#define Lf 8
-#define Lb 7
-#define enR 11
-#define enL 10
-
-Bot bot(Rf, Rb, Lf, Lb, enR, enL);
-
-uint8_t fast = 255;
-uint8_t mid = (255/2) + 10;
-uint8_t slow = 10;
+#define Lf 19
+#define Lb 18
+#define enL 5
 
 void setup() {
-    bot.init();
-    bot.stop(0);
+  pinMode(Rf, OUTPUT);
+  pinMode(Rb, OUTPUT);
+  pinMode(enR, OUTPUT);
+
+  pinMode(Lf, OUTPUT);
+  pinMode(Lb, OUTPUT);
+  pinMode(enL, OUTPUT);
+}
+
+// Ramp up/down PWM
+void rampSpeed(int startSpeed, int endSpeed, int stepDelay = 10) {
+  if (startSpeed < endSpeed) {
+    for (int spd = startSpeed; spd <= endSpeed; spd += 5) {
+      analogWrite(enR, spd);
+      analogWrite(enL, spd);
+      delay(stepDelay);
+    }
+  } else {
+    for (int spd = startSpeed; spd >= endSpeed; spd -= 5) {
+      analogWrite(enR, spd);
+      analogWrite(enL, spd);
+      delay(stepDelay);
+    }
+  }
+}
+
+void move(int rf, int rb, int lf, int lb, int duration) {
+  digitalWrite(Rf, rf);
+  digitalWrite(Rb, rb);
+  digitalWrite(Lf, lf);
+  digitalWrite(Lb, lb);
+
+  rampSpeed(0, 255);   // Ramp up
+  delay(duration);
+  rampSpeed(255, 0);   // Ramp down
+
+  // Stop motors
+  digitalWrite(Rf, LOW);
+  digitalWrite(Rb, LOW);
+  digitalWrite(Lf, LOW);
+  digitalWrite(Lb, LOW);
 }
 
 void loop() {
-    bot.forward(1, fast);
-    bot.reverse(1, fast);
-    bot.left(1, fast);
-    bot.right(1, fast);
+  move(HIGH, LOW, HIGH, LOW, 3000);   // Forward for 3s
+  delay(500);
 
-    bot.forward(1, mid);
-    bot.reverse(1, mid);
-    bot.left(1, mid);
-    bot.right(1, mid);
+  move(LOW, HIGH, LOW, LOW, 3000);    // Reverse left (left motor back only)
+  delay(500);
 
-    bot.forward(1, slow);
-    bot.reverse(1, slow);
-    bot.left(1, slow);
-    bot.right(1, slow);
+  move(LOW, LOW, LOW, HIGH, 3000);    // Reverse right (right motor back only)
+  delay(500);
 }
