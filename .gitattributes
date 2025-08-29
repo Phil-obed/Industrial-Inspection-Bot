@@ -1,0 +1,22 @@
+# Auto-detect text files and enforce LF
+* text=auto eol=lf
+
+# Source code (Arduino / C++)
+*.c     text eol=lf
+*.cpp   text eol=lf
+*.h     text eol=lf
+*.hpp   text eol=lf
+*.ino   text eol=lf
+
+# Config & build files
+*.json  text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.ini   text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+
+# KiCad files
+*.kicad_* text eol=lf
+*.sch     text eol=lf
+*.pcb     text eol=lf
