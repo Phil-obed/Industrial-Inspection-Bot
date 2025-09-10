@@ -1,68 +1,87 @@
+import serial
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import numpy as np
+from matplotlib.animation import FuncAnimation
 
-# Create a figure and axis
-fig, ax = plt.subplots(figsize=(10, 10))
+# ---------------- USER CONFIG ----------------
+PORT = "COM5"         # change to your ESP32 serial port (e.g., "/dev/ttyUSB0" on Linux/Mac)
+BAUD = 115200
+NUM_SENSORS = 5
+MAX_RANGE = [400, 400, 400, 300, 300]  # cm, per sensor max range (tweak if needed)
 
-# Robot parameters
-robot_width = 3.5
-robot_height = 5.0
-robot_x = 0  # center X
-robot_y = 0  # center Y
+# Sensor layout: (x, y, angle, max_range, fov)
+sensors = [
+    (0, 2.5, 90, 400, 30),   # front mid
+    (-1.75, 2.5, 110, 400, 30), # front left
+    (1.75, 2.5, 70, 400, 30),  # front right
+    (-1.75, 0, 180, 300, 30),  # left
+    (1.75, 0, 0, 300, 30),     # right
+]
 
-# Draw robot body
-robot = patches.Rectangle(
-    (robot_x - robot_width/2, robot_y - robot_height/2), 
-    robot_width,
-    robot_height,
-    linewidth=2,
-    edgecolor='none',
-    facecolor='black'
-)
+# ---------------- SERIAL SETUP ----------------
+ser = serial.Serial(PORT, BAUD, timeout=1)
 
-# Wheels
-wheel1 = patches.Rectangle(((robot_x - robot_width/2)-1.1, robot_y - robot_height/2), 1, 2, facecolor='black')
-wheel2 = patches.Rectangle(((robot_x - robot_width/2)-1.1, 0.5), 1, 2, facecolor='black')
-wheel3 = patches.Rectangle((1.85, robot_y - robot_height/2), 1, 2, facecolor='black')
-wheel4 = patches.Rectangle((1.85, 0.5), 1, 2, facecolor='black')
+# ---------------- PLOT SETUP ----------------
+fig, ax = plt.subplots(figsize=(8, 8))
 
-# Add robot + wheels
+# Robot body
+robot_width, robot_height = 3.5, 5.0
+robot = patches.Rectangle((-robot_width/2, -robot_height/2),
+                          robot_width, robot_height,
+                          facecolor="black")
 ax.add_patch(robot)
-ax.add_patch(wheel1)
-ax.add_patch(wheel2)
-ax.add_patch(wheel3)
-ax.add_patch(wheel4)
 
-# ---- Ultrasonic Sensor Visuals ----
-def add_sensor(ax, x, y, angle_deg, fov=15, max_range=1, color="orange"):
-    """
-    Adds an ultrasonic sensor visualization as a fan-shaped arc.
-    """
-    arc = patches.Wedge(
-        (x, y),                   # position of sensor
-        max_range,                # radius
-        angle_deg - fov/2,        # start angle
-        angle_deg + fov/2,        # end angle
-        facecolor=color,
-        alpha=0.3
-    )
+# Wheels (just visuals)
+wheels = [
+    patches.Rectangle((-robot_width/2 - 1.1, -robot_height/2), 1, 2, facecolor="black"),
+    patches.Rectangle((-robot_width/2 - 1.1, 0.5), 1, 2, facecolor="black"),
+    patches.Rectangle((robot_width/2 + 0.1, -robot_height/2), 1, 2, facecolor="black"),
+    patches.Rectangle((robot_width/2 + 0.1, 0.5), 1, 2, facecolor="black"),
+]
+for w in wheels:
+    ax.add_patch(w)
+
+# Sensor arcs
+sensor_arcs = []
+for (x, y, angle, max_range, fov) in sensors:
+    bg = patches.Wedge((x, y), max_range, angle - fov/2, angle + fov/2,
+                       facecolor="gray", alpha=0.1)
+    arc = patches.Wedge((x, y), 0.01, angle - fov/2, angle + fov/2,
+                        facecolor="none", alpha=0.6)
+    ax.add_patch(bg)
     ax.add_patch(arc)
-    # also draw sensor point
     ax.plot(x, y, "ko")
+    sensor_arcs.append(arc)
 
-# Add front sensors
-add_sensor(ax, 0, robot_height/2, 90, fov=30, max_range=4)                      # center front
-add_sensor(ax, -robot_width/2, robot_height/2, 110, fov=30, max_range=4)        # front left angled outward
-add_sensor(ax, robot_width/2, robot_height/2, 70, fov=30, max_range=4)          # front right angled outward
-
-# Add side sensors
-add_sensor(ax, -robot_width/2, 0, 180, fov=30, max_range=3)  # left side
-add_sensor(ax, robot_width/2, 0, 0, fov=30, max_range=3)     # right side
-
-# Plot setup
 ax.set_xlim(-6, 6)
 ax.set_ylim(-6, 6)
-ax.set_aspect('equal', adjustable='box')
-plt.title("Ultrasonic Visualization")
+ax.set_aspect("equal")
+ax.set_title("Ultrasonic Sensor Visualization")
+
+# ---------------- UPDATE FUNCTION ----------------
+def update(frame):
+    try:
+        line = ser.readline().decode().strip()
+        if not line:
+            return
+        values = [float(v) for v in line.split(",")]
+        if len(values) != NUM_SENSORS:
+            return
+
+        for val, arc, (x, y, angle, max_r, fov) in zip(values, sensor_arcs, sensors):
+            dist = min(val, max_r)  # clamp
+            arc.set_radius(dist)
+
+            # color map
+            if dist < max_r * 0.3:
+                arc.set_facecolor("red")
+            elif dist < max_r * 0.7:
+                arc.set_facecolor("yellow")
+            else:
+                arc.set_facecolor("green")
+    except Exception as e:
+        print("Error:", e)
+
+# ---------------- RUN ----------------
+ani = FuncAnimation(fig, update, interval=50)  # ~20 FPS
 plt.show()
