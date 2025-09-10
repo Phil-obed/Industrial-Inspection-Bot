@@ -4,7 +4,7 @@ import matplotlib.patches as patches
 from matplotlib.animation import FuncAnimation
 
 # ---------------- USER CONFIG ----------------
-PORT = "COM5"         # change to your ESP32 serial port (e.g., "/dev/ttyUSB0" on Linux/Mac)
+PORT = "/dev/ttyUSB0"
 BAUD = 115200
 NUM_SENSORS = 5
 MAX_RANGE = [400, 400, 400, 300, 300]  # cm, per sensor max range (tweak if needed)
@@ -82,6 +82,6 @@ def update(frame):
     except Exception as e:
         print("Error:", e)
 
-# ---------------- RUN ----------------
+# RUN
 ani = FuncAnimation(fig, update, interval=50)  # ~20 FPS
 plt.show()
