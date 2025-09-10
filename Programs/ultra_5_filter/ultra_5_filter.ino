@@ -85,12 +85,21 @@ void loop() {
   float right  = out[4];
 
   // Print results
-  Serial.print("Raw: ");
-  for (int i = 0; i < NUM_SENSORS; ++i) { Serial.print(raw[i]); Serial.print(i==NUM_SENSORS-1? "":" , "); }
-  Serial.print(" | Filtered: ");
-  for (int i = 0; i < NUM_SENSORS; ++i) { Serial.print(out[i]); Serial.print(i==NUM_SENSORS-1? "":" , "); }
-  Serial.print(" | FrontMin: "); Serial.print(frontMin);
-  Serial.print(" | L: "); Serial.print(left); Serial.print(" R: "); Serial.println(right);
+  // Serial.print("Raw: ");
+  // for (int i = 0; i < NUM_SENSORS; ++i) { Serial.print(raw[i]); Serial.print(i==NUM_SENSORS-1? "":" , "); }
+  // Serial.print(" | Filtered: ");
+  // for (int i = 0; i < NUM_SENSORS; ++i) { Serial.print(out[i]); Serial.print(i==NUM_SENSORS-1? "":" , "); }
+  // Serial.print(" | FrontMin: "); Serial.print(frontMin);
+  // Serial.print(" | L: "); Serial.print(left); Serial.print(" R: "); Serial.println(right);
+
+  // --- Print Filtered Values Only (CSV format) ---
+  for (int i = 0; i < NUM_SENSORS; i++) {
+    Serial.print(out[i], 2); // 2 decimal places
+    if (i < NUM_SENSORS - 1) Serial.print(",");
+  }
+  Serial.println();
+
+  
 
   // Example avoidance logic (very simple)
   const float STOP_DIST_CM = 25.0; // stop threshold
@@ -101,3 +110,4 @@ void loop() {
 
   // small delay to let sensors settle before next loop if desired
 }
+
