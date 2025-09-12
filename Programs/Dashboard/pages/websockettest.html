@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Robot Control - My Side</title>
+</head>
+<body>
+  <h2>Robot Controller</h2>
+
+  <div>
+    <button onclick="sendCmd('forward')">Forward</button>
+    <button onclick="sendCmd('back')">Back</button>
+    <button onclick="sendCmd('left')">Left</button>
+    <button onclick="sendCmd('right')">Right</button>
+    <button onclick="sendCmd('stop')">Stop</button>
+  </div>
+
+  <div>
+    Speed: <input id="speed" type="range" min="0" max="255" value="200" oninput="val.innerText=this.value">
+    <span id="val">200</span>
+  </div>
+
+  <h3>Sensor Data</h3>
+  <p>MQ135: <span id="mq135">--</span>%</p>
+  <p>MQ9: <span id="mq9">--</span>%</p>
+
+  <p id="status" style="color:green">Connecting...</p>
+
+  <script>
+    let ws;
+
+    function initWS() {
+      ws = new WebSocket("ws://192.168.4.1/ws");
+
+      ws.onopen = () => {
+        document.getElementById("status").innerText = "Connected ✅";
+      };
+
+      ws.onclose = () => {
+        document.getElementById("status").innerText = "Disconnected ❌";
+        setTimeout(initWS, 2000); // auto-reconnect
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if ("mq135" in data) document.getElementById("mq135").innerText = data.mq135.toFixed(1);
+          if ("mq9" in data) document.getElementById("mq9").innerText = data.mq9.toFixed(1);
+        } catch (e) {
+          console.log("Parse error:", e);
+        }
+      };
+    }
+
+    function sendCmd(cmd) {
+      const speed = parseInt(document.getElementById("speed").value);
+      const msg = JSON.stringify({ cmd: cmd, speed: speed });
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(msg);
+      else alert("WebSocket not connected");
+    }
+
+    window.onload = initWS;
+  </script>
+</body>
+</html>
