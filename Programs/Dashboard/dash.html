@@ -6,32 +6,24 @@
     <title>Dashboard</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
     <link rel="stylesheet" href="dash.css">
-
+    <link rel="stylesheet" href="dash_map.css">
 </head>
 <body>
     <div class="dashboard">
         <div class="panel ultrasonic">
             <div class="panel-title">Ultrasonic</div>
-            <div class="panel-content">
-                Sensor data ready
-            </div>
+            <div class="panel-content">Sensor data ready</div>
         </div>
 
         <div class="panel front-cam">
             <div class="panel-title">Front Cam</div>
-            <div class="panel-content">
-                Camera feed active
-            </div>
+            <div class="panel-content">Camera feed active</div>
         </div>
 
         <div class="panel thermal-cam">
             <div class="panel-title">Thermal cam</div>
-            <div class="panel-content">
-                Thermal imaging
-            </div>
+            <div class="panel-content">Thermal imaging</div>
         </div>
 
         <div class="panel gas-levels">
@@ -49,9 +41,8 @@
         </div>
 
         <div class="panel map">
-            <div class="panel-title">Map</div>
             <div class="panel-content">
-                Distance monitoring
+                <div id="map"></div>
             </div>
         </div>
 
@@ -62,7 +53,6 @@
                     <button id="connect-btn">Connect to Bot</button>
                     <button id="mode-btn">Switch Mode</button>
                 </div>
-
                 <div id="mode-status" class="mode-status">MODE: MANUAL</div>
             </div>
         </div>
@@ -79,6 +69,9 @@
             </div>
         </div>
     </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="dash_console.js"></script>
+    <script src="dash_map.js"></script>
 </body>
 </html>
