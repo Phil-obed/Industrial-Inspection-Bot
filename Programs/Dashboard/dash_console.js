@@ -2,6 +2,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const input = document.getElementById("command-input");
     const output = document.getElementById("output");
 
+    // connection buttons
+    const connectBtn = document.getElementById("connect-btn");
+    const modeBtn = document.getElementById("mode-btn");
+    const modeStatus = document.getElementById("mode-status");
+    let mode = "manual"; // default
+
     input.addEventListener("keydown", function(event) {
         if (event.key === "Enter") {
             const command = input.value.trim();
@@ -52,6 +58,9 @@ ping         -> Test connectivity
 
 Control
 -------
+mode         -> Show current control mode
+manual       -> Switch to manual control mode
+auto         -> Switch to autonomous mode
 reboot       -> Restart bot system
 shutdown     -> Safely power off
 </pre>
@@ -60,6 +69,8 @@ shutdown     -> Safely power off
                 output.innerHTML += "<div>Industrial Inspection Bot v1.0<br>Developed by ePIKK Robotics <br><br>Credits:<br>&nbsp;&nbsp;&nbsp;Philemon Obed Obeng<br>&nbsp;&nbsp;&nbsp;Benjamine Asare<br>&nbsp;&nbsp;&nbsp;Evans Tetteh<br>&nbsp;&nbsp;&nbsp;Akwesi Frimpong<br><br>This is a terminal to send commands to the Argus bot...<br>Use 'help' to list available commands.</div>";
             } else if (command === "clear") {
                 output.innerHTML = "";
+            } else if (command === "mode") {
+                output.innerHTML += `<div>Current control mode: <b>${mode.toUpperCase()}</b></div>`;
             } else if (command !== "") {
                 output.innerHTML += "<div>Command not found: " + command + "</div>";
             }
@@ -69,4 +80,26 @@ shutdown     -> Safely power off
             output.scrollTop = output.scrollHeight;
         }
     });
+
+    function updateModeStatus() {
+        modeStatus.textContent = `MODE: ${mode.toUpperCase()}`;
+    }
+
+    function printToConsole(message) {
+        output.innerHTML += `<div><span class="prompt">$argus-bot:</span> ${message}</div>`;
+        output.scrollTop = output.scrollHeight;
+    }
+
+    connectBtn.addEventListener("click", function() {
+        printToConsole("Attempting connection...");
+        setTimeout(() => printToConsole("Connection established successfully."), 1000);
+    });
+
+    modeBtn.addEventListener("click", function() {
+        mode = mode === "manual" ? "auto" : "manual";
+        printToConsole(`Switched mode to: ${mode.toUpperCase()}`);
+        updateModeStatus();
+    });
+
+    updateModeStatus();
 });

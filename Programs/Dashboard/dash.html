@@ -54,23 +54,16 @@
         <div class="panel connections">
             <div class="panel-title">Connections</div>
             <div class="panel-content">
-                <div class="connection-item">
-                    <div class="connection-dot"></div>
-                    WiFi Connected
+                <div class="connection-buttons">
+                    <button id="connect-btn">Connect to Bot</button>
+                    <button id="mode-btn">Switch Mode</button>
                 </div>
-                <div class="connection-item">
-                    <div class="connection-dot"></div>
-                    Bluetooth Active
-                </div>
-                <div class="connection-item">
-                    <div class="connection-dot"></div>
-                    Sensors Online
-                </div>
+
+                <div id="mode-status" class="mode-status">MODE: MANUAL</div>
             </div>
         </div>
 
         <div class="panel console">
-            <div class="panel-title">Console</div>
             <div class="panel-content">
                 <div id="terminal">
                     <div id="output"></div>
