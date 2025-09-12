@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi Vertical Segmented Bars</title>
+  <style>
+    body {
+      background: #111;
+      color: #ddd;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .bars-wrapper {
+      display: flex;
+      gap: 40px; /* spacing between bars */
+      align-items: flex-end;
+    }
+
+    .progress-container {
+      display: flex;
+      flex-direction: column-reverse; /* Fill from bottom */
+      width: 40px;
+      height: 200px;
+      border: 2px solid #444;
+      border-radius: 6px;
+      padding: 4px;
+      background: #222;
+      gap: 4px;
+    }
+
+    .segment {
+      flex: 1;
+      background: #444;
+      border-radius: 2px;
+      transition: background 0.3s;
+    }
+
+    .segment.active {
+      background: #fff;
+    }
+
+    .bar-label {
+      text-align: center;
+      margin-top: 6px;
+      font-size: 14px;
+      color: #bbb;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #444;
+      color: #ddd;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Gas Levels</h2>
+
+  <div class="bars-wrapper">
+    <div class="bar-group">
+      <div class="progress-container" id="barCO"></div>
+      <div class="bar-label">CO</div>
+    </div>
+    <div class="bar-group">
+      <div class="progress-container" id="barMethane"></div>
+      <div class="bar-label">Methane</div>
+    </div>
+    <div class="bar-group">
+      <div class="progress-container" id="barLPG"></div>
+      <div class="bar-label">LPG</div>
+    </div>
+    <div class="bar-group">
+      <div class="progress-container" id="barAir"></div>
+      <div class="bar-label">Air Quality</div>
+    </div>
+  </div>
+
+  <button onclick="randomizeBars()">Randomize</button>
+
+  <script>
+    const totalSegments = 10;
+
+    // Initialize bars
+    function buildBar(barId) {
+      const container = document.getElementById(barId);
+      for (let i = 0; i < totalSegments; i++) {
+        const segment = document.createElement("div");
+        segment.classList.add("segment");
+        container.appendChild(segment);
+      }
+    }
+
+    ["barCO", "barMethane", "barLPG", "barAir"].forEach(buildBar);
+
+    function setProgress(barId, value) {
+      const container = document.getElementById(barId);
+      const segments = container.querySelectorAll(".segment");
+      const activeCount = Math.round((value / 100) * totalSegments);
+      segments.forEach((seg, index) => {
+        if (index < activeCount) {
+          seg.classList.add("active");
+        } else {
+          seg.classList.remove("active");
+        }
+      });
+    }
+
+    function randomizeBars() {
+      setProgress("barCO", Math.random() * 100);
+      setProgress("barMethane", Math.random() * 100);
+      setProgress("barLPG", Math.random() * 100);
+      setProgress("barAir", Math.random() * 100);
+    }
+
+    // Init with zero progress
+    ["barCO", "barMethane", "barLPG", "barAir"].forEach(id => setProgress(id, 0));
+  </script>
+
+</body>
+</html>

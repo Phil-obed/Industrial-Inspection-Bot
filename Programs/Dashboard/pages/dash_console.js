@@ -305,5 +305,50 @@ shutdown     -> Safely power off
         updateModeStatus();
     });
 
+    const sensors = [
+  { x: 0.00,  y: 2.5,  angle:  90, max_r: 4.0, fov: 30 },
+  { x: -1.75, y: 2.5,  angle: 110, max_r: 4.0, fov: 30 },
+  { x:  1.75, y: 2.5,  angle:  70, max_r: 4.0, fov: 30 },
+  { x: -1.75, y: 0.0,  angle: 180, max_r: 3.0, fov: 30 },
+  { x:  1.75, y: 0.0,  angle:   0, max_r: 3.0, fov: 30 },
+];
+
+const svg = document.getElementById('svg');
+
+function polarToSvg(cx, cy, radius, angleDeg) {
+  const cx_svg = cx;
+  const cy_svg = -cy;
+  const rad = angleDeg * Math.PI / 180;
+  const x = cx_svg + radius * Math.cos(rad);
+  const y = cy_svg - radius * Math.sin(rad);
+  return { x, y };
+}
+
+function makeWedgePath(cx, cy, radius, startAngle, endAngle) {
+  const start = polarToSvg(cx, cy, radius, startAngle);
+  const end   = polarToSvg(cx, cy, radius, endAngle);
+
+  let fov = endAngle - startAngle;
+  if (fov < 0) fov += 360;
+  const largeArcFlag = (fov > 180) ? 1 : 0;
+  const sweepFlag = 0;
+
+  return `M ${cx} ${-cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y} Z`;
+}
+
+// Draw arcs (no dots)
+sensors.forEach(s => {
+  const cx = s.x, cy = s.y, angle = s.angle, fov = s.fov, maxR = s.max_r;
+  const startAngle = angle - fov/2;
+  const endAngle = angle + fov/2;
+
+  const path = makeWedgePath(cx, cy, maxR, startAngle, endAngle);
+  const wedge = document.createElementNS('http://www.w3.org/2000/svg','path');
+  wedge.setAttribute('d', path);
+  wedge.setAttribute('class', 'wedge');
+  svg.appendChild(wedge);
+});
+
+
     updateModeStatus();
 });

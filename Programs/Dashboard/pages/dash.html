@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="dash.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="panel ultrasonic">
+            <div class="bot-container">
+  <!-- Arcs layer -->
+  <div class="arcs">
+    <svg id="svg" viewBox="-6 -6 12 12" preserveAspectRatio="xMidYMid meet"
+         xmlns="http://www.w3.org/2000/svg" aria-label="Sensor arcs">
+    </svg>
+  </div>
+
+  <!-- Bot images -->
+  <img src="../images/bot.png" alt="Bot body" class="bot-img" />
+  <img src="../images/wheels.png" alt="Bot wheels" class="wheels-img" />
+</div>
+
+        </div>
+
+        <div class="panel front-cam">
+            <div class="panel-title">Front Cam</div>
+            <div class="panel-content">Camera feed active</div>
+        </div>
+
+        <div class="panel thermal-cam">
+            <div class="panel-title">Thermal cam</div>
+            <div class="panel-content">Thermal imaging</div>
+        </div>
+
+        <div class="panel gas-levels">
+            <div class="panel-content">
+                <!-- Gas Level Indicators -->
+                <div class="bars-wrapper">
+                    <div class="bar-group">
+                        <div class="progress-container" id="barCO"></div>
+                        <div class="bar-label">CO</div>
+                    </div>
+                    <div class="bar-group">
+                        <div class="progress-container" id="barMethane"></div>
+                        <div class="bar-label">CH4</div>
+                    </div>
+                    <div class="bar-group">
+                        <div class="progress-container" id="barLPG"></div>
+                        <div class="bar-label">LPG</div>
+                    </div>
+                    <div class="bar-group">
+                        <div class="progress-container" id="barAir"></div>
+                        <div class="bar-label">Air Quality</div>
+                    </div>
+                </div>
+
+                <!-- Gas Chart -->
+                <canvas id="gasChart" style="width:100%; max-height:200px;"></canvas>
+            </div>
+        </div>
+
+        <div class="panel map">
+            <div class="panel-content">
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div class="panel connections">
+            <div class="panel-title">Connections</div>
+            <div class="panel-content">
+                <div class="connection-buttons">
+                    <button id="connect-btn">Connect to Bot</button>
+                    <button id="mode-btn">Switch Mode</button>
+                </div>
+                <div id="mode-status" class="mode-status">MODE: MANUAL</div>
+            </div>
+        </div>
+
+        <div class="panel console">
+            <div class="panel-content">
+                <div id="terminal">
+                    <div id="output"></div>
+                    <div id="input-line">
+                        <span class="prompt">argus-bot: $</span>
+                        <input type="text" id="command-input" autofocus />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="dash_console.js"></script>
+    <script src="dash_map.js"></script>
+
+    <script>
+        const totalSegments = 10;
+
+        function buildBar(barId) {
+            const container = document.getElementById(barId);
+            for (let i = 0; i < totalSegments; i++) {
+                const segment = document.createElement("div");
+                segment.classList.add("segment");
+                container.appendChild(segment);
+            }
+        }
+
+        ["barCO", "barMethane", "barLPG", "barAir"].forEach(buildBar);
+
+        function setProgress(barId, value) {
+            const container = document.getElementById(barId);
+            const segments = container.querySelectorAll(".segment");
+            const activeCount = Math.round((value / 100) * totalSegments);
+            segments.forEach((seg, index) => {
+                if (index < activeCount) {
+                    seg.classList.add("active");
+                } else {
+                    seg.classList.remove("active");
+                }
+            });
+        }
+
+        // Init with random values for now
+        setProgress("barCO", 40);
+        setProgress("barMethane", 70);
+        setProgress("barLPG", 20);
+        setProgress("barAir", 55);
+    </script>
+</body>
+</html>
