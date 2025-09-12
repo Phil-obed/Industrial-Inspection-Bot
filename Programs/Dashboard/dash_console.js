@@ -8,6 +8,81 @@ document.addEventListener("DOMContentLoaded", function () {
     const modeStatus = document.getElementById("mode-status");
     let mode = "manual"; // default
 
+    // ===== GAS GRAPH SETUP =====
+const ctx = document.getElementById('gasChart').getContext('2d');
+const gasChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [], // timestamps
+        datasets: [
+    {
+        label: 'CO',
+        borderColor: 'rgba(80, 80, 80, 1)',         // dark gray
+        backgroundColor: 'rgba(80, 80, 80, 0.3)',   // transparent gray fill
+        data: []
+    },
+    {
+        label: 'CH4',
+        borderColor: 'rgba(220, 220, 220, 1)',      // dim white / off-white
+        backgroundColor: 'rgba(220, 220, 220, 0.3)',
+        data: []
+    },
+    {
+        label: 'LPG',
+        borderColor: 'rgba(100, 130, 180, 1)',      // soft steel blue
+        backgroundColor: 'rgba(100, 130, 180, 0.3)',
+        data: []
+    },
+    {
+        label: 'Air Quality',
+        borderColor: 'rgba(143, 184, 113, 1)',      // light gray
+        backgroundColor: 'rgba(180, 180, 180, 0.3)',
+        data: []
+    }
+]
+
+    },
+    options: {
+        responsive: true,
+        animation: false,
+        plugins: {
+            legend: {
+                labels: { color: 'white' }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: 'white' }
+            },
+            y: {
+                ticks: { color: 'white' },
+                beginAtZero: true,
+                suggestedMax: 100
+            }
+        }
+    }
+});
+
+// Simulate sensor updates every 2s
+setInterval(() => {
+    const now = new Date().toLocaleTimeString();
+
+    gasChart.data.labels.push(now);
+    if (gasChart.data.labels.length > 10) gasChart.data.labels.shift();
+
+    gasChart.data.datasets[0].data.push(Math.floor(Math.random() * 100)); // CO
+    gasChart.data.datasets[1].data.push(Math.floor(Math.random() * 100)); // Methane
+    gasChart.data.datasets[2].data.push(Math.floor(Math.random() * 100)); // LPG
+    gasChart.data.datasets[3].data.push(Math.floor(Math.random() * 100)); // Air Quality
+
+    gasChart.data.datasets.forEach(ds => {
+        if (ds.data.length > 10) ds.data.shift();
+    });
+
+    gasChart.update();
+}, 2000);
+
+
     // ====== MAP SETUP ======
     const map = L.map("map").setView([7.351136, -2.341782], 17);
 
