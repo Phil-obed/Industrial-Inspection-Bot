@@ -72,9 +72,16 @@
         <div class="panel console">
             <div class="panel-title">Console</div>
             <div class="panel-content">
-                Console
+                <div id="terminal">
+                    <div id="output"></div>
+                    <div id="input-line">
+                        <span class="prompt">argus-bot: $</span>
+                        <input type="text" id="command-input" autofocus />
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <script src="dash_console.js"></script>
 </body>
 </html>
