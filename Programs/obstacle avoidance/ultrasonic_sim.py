@@ -16,7 +16,7 @@ sensors = [
     (1.75, 2.5, 70, 400, 30),  # front right
     (-1.75, 0, 180, 300, 30),  # left
     (1.75, 0, 0, 300, 30),     # right
-]
+]   
 
 # ---------------- SERIAL SETUP ----------------
 ser = serial.Serial(PORT, BAUD, timeout=1)
