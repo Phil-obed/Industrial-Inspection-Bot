@@ -34,46 +34,54 @@ document.addEventListener("DOMContentLoaded", function () {
     let destinationMarker = null;
 
     function generateCrookedRoute(from, to, actionType = "Go To") {
-        if (currentRoute) map.removeLayer(currentRoute);
-        if (destinationMarker) map.removeLayer(destinationMarker);
+    if (currentRoute) map.removeLayer(currentRoute);
+    if (destinationMarker) map.removeLayer(destinationMarker);
 
-        // drop destination pin
-        destinationMarker = L.marker(to)
-            .addTo(map)
-            .bindPopup(`Destination (${actionType})`)
-            .openPopup();
+    // drop destination pin
+    destinationMarker = L.marker(to)
+        .addTo(map)
+        .bindPopup(`Destination (${actionType})`)
+        .openPopup();
 
-        // crooked route points
-        let latlngs = [from];
-        let numPoints = 3;
-        for (let i = 0; i < numPoints; i++) {
-            let lat =
-                from.lat +
-                (to.lat - from.lat) * (i + 1) / (numPoints + 1) +
-                (Math.random() - 0.5) * 0.0003;
-            let lng =
-                from.lng +
-                (to.lng - from.lng) * (i + 1) / (numPoints + 1) +
-                (Math.random() - 0.5) * 0.0003;
-            latlngs.push([lat, lng]);
-        }
-        latlngs.push(to);
+    // crooked route points
+    let latlngs = [from];
+    let numPoints = 3;
 
-        // dark golden glowing route
-        currentRoute = L.polyline(latlngs, {
-            color: "#b8860b", // dark golden
-            weight: 6,
-            opacity: 0.9,
-            className: "glow-route",
-        }).addTo(map);
+    // scale zigzag "noise" by distance
+    let latDiff = Math.abs(to.lat - from.lat);
+    let lngDiff = Math.abs(to.lng - from.lng);
+    let scale = Math.max(latDiff, lngDiff) * 0.5; // half of the span
+    let maxJitter = Math.min(scale, 0.0003); // cap so it doesn’t get crazy
 
-        map.fitBounds(currentRoute.getBounds());
-
-        // log to console
-        output.innerHTML += `<div>${actionType} (${to.lat.toFixed(
-            6
-        )}, ${to.lng.toFixed(6)})...</div>`;
+    for (let i = 0; i < numPoints; i++) {
+        let lat =
+            from.lat +
+            (to.lat - from.lat) * (i + 1) / (numPoints + 1) +
+            (Math.random() - 0.5) * maxJitter;
+        let lng =
+            from.lng +
+            (to.lng - from.lng) * (i + 1) / (numPoints + 1) +
+            (Math.random() - 0.5) * maxJitter;
+        latlngs.push([lat, lng]);
     }
+    latlngs.push(to);
+
+    // dark golden glowing route
+    currentRoute = L.polyline(latlngs, {
+        color: "#b8860b", // dark golden
+        weight: 6,
+        opacity: 0.9,
+        className: "glow-route",
+    }).addTo(map);
+
+    map.fitBounds(currentRoute.getBounds());
+
+    // log to console
+    output.innerHTML += `<div>${actionType} (${to.lat.toFixed(
+        6
+    )}, ${to.lng.toFixed(6)})...</div>`;
+}
+
 
     // Custom CSS for glowing effect
     const style = document.createElement("style");

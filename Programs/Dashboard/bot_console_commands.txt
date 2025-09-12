@@ -3,43 +3,47 @@ Industrial Inspection Bot Console Commands
 
 System / Info
 -------------
-about          -> Show bot details and version
-status         -> General health check (battery %, sensor states, connectivity)
-uptime         -> How long the bot has been running
-date           -> Show system date/time
-clear          -> Clear terminal output
+help         -> Show this help menu
+about        -> Show bot details and version
+status       -> Health check(battery, sensor states, connectivity)
+uptime       -> How long the bot has been running
+date         -> Show system date/time
+clear        -> Clear terminal output
 
 Navigation / Movement
 ---------------------
-move forward   -> Move bot forward
-move back      -> Move bot backward
-turn left      -> Rotate bot left
-turn right     -> Rotate bot right
-stop           -> Emergency stop
-goto <x,y>     -> Move to specific coordinate
+move forward -> Move bot forward
+move back    -> Move bot backward
+turn left    -> Rotate bot left
+turn right   -> Rotate bot right
+stop         -> Emergency stop
+goto <x,y>   -> Move to specific coordinate (plot on map)
 
 Sensors
 -------
-ultrasonic     -> Print distance readings
-thermal        -> Show thermal camera status or snapshot
-gas            -> Show gas levels (CO, methane, LPG, air quality)
-camera on      -> Enable front camera feed
-camera off     -> Disable front camera feed
-sensors        -> List all active sensors with status
+ultrasonic   -> Print distance readings
+thermal      -> Show thermal camera status or snapshot
+gas          -> Show gas levels (CO, methane, LPG, air quality)
+camera on    -> Enable front camera feed
+camera off   -> Disable front camera feed
+sensors      -> List all active sensors with status
 
 Data / Logs
 -----------
-log list       -> Show available log files
-log view <f>   -> Display a specific log
-log clear      -> Clear stored logs
+log list     -> Show available log files
+log view <f> -> Display a specific log
+log clear    -> Clear stored logs
 
 Connections
 -----------
-wifi status    -> Check WiFi status
-bt status      -> Check Bluetooth status
-ping           -> Test connectivity
+wifi status  -> Check WiFi status
+bt status    -> Check Bluetooth status
+ping         -> Test connectivity
 
 Control
 -------
-reboot         -> Restart bot system
-shutdown       -> Safely power off
+mode         -> Show current control mode
+manual       -> Switch to manual control mode
+auto         -> Switch to autonomous mode
+reboot       -> Restart bot system
+shutdown     -> Safely power off
