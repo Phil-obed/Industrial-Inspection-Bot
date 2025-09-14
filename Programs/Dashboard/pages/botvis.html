@@ -122,6 +122,19 @@ sensors.forEach(s => {
   wedge.setAttribute('d', path);
   wedge.setAttribute('class', 'wedge');
   svg.appendChild(wedge);
+
+    // border at the tip (straight line across the arc opening)
+  const startTip = polarToSvg(cx, cy, maxR, startAngle);
+  const endTip   = polarToSvg(cx, cy, maxR, endAngle);
+
+  const tipLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+  tipLine.setAttribute('x1', startTip.x);
+  tipLine.setAttribute('y1', startTip.y);
+  tipLine.setAttribute('x2', endTip.x);
+  tipLine.setAttribute('y2', endTip.y);
+  tipLine.setAttribute('class', 'arc-border');
+  svg.appendChild(tipLine);
+
 });
 </script>
 </body>
