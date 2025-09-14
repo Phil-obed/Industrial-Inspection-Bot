@@ -533,7 +533,7 @@
       "netlist": "",
       "plot": "",
       "pos_files": "",
-      "specctra_dsn": "",
+      "specctra_dsn": "../routes/HAT_1.dsn",
       "step": "HAT_1.step",
       "svg": "",
       "vrml": ""

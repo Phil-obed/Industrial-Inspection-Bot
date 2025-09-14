@@ -15,32 +15,39 @@ const gasChart = new Chart(ctx, {
     data: {
         labels: [], // timestamps
         datasets: [
-    {
-        label: 'CO',
-        borderColor: 'rgba(80, 80, 80, 1)',         // dark gray
-        backgroundColor: 'rgba(80, 80, 80, 0.3)',   // transparent gray fill
-        data: []
-    },
-    {
-        label: 'CH4',
-        borderColor: 'rgba(220, 220, 220, 1)',      // dim white / off-white
-        backgroundColor: 'rgba(220, 220, 220, 0.3)',
-        data: []
-    },
-    {
-        label: 'LPG',
-        borderColor: 'rgba(100, 130, 180, 1)',      // soft steel blue
-        backgroundColor: 'rgba(100, 130, 180, 0.3)',
-        data: []
-    },
-    {
-        label: 'Air Quality',
-        borderColor: 'rgba(143, 184, 113, 1)',      // light gray
-        backgroundColor: 'rgba(180, 180, 180, 0.3)',
-        data: []
-    }
-]
-
+            {
+                label: 'CO',
+                borderColor: 'rgba(80, 80, 80, 1)',         // dark gray
+                backgroundColor: 'rgba(80, 80, 80, 0.3)',   // transparent gray fill
+                data: [],
+                fill: true,
+                tension: 0.4   // <--- smooth curve
+            },
+            {
+                label: 'CH4',
+                borderColor: 'rgba(220, 220, 220, 1)',      // dim white / off-white
+                backgroundColor: 'rgba(220, 220, 220, 0.3)',
+                data: [],
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'LPG',
+                borderColor: 'rgba(100, 130, 180, 1)',      // soft steel blue
+                backgroundColor: 'rgba(100, 130, 180, 0.3)',
+                data: [],
+                fill: true,
+                tension: 0.4
+            },
+            {
+                label: 'Air Quality',
+                borderColor: 'rgba(143, 184, 113, 1)',      // greenish gray
+                backgroundColor: 'rgba(180, 180, 180, 0.3)',
+                data: [],
+                fill: true,
+                tension: 0.4
+            }
+        ]
     },
     options: {
         responsive: true,
@@ -259,7 +266,7 @@ shutdown     -> Safely power off
 </div>`;
             } else if (command === "about") {
                 output.innerHTML +=
-                    "<div>Industrial Inspection Bot v1.0<br>Developed by ePIKK Robotics <br><br>Credits:<br>&nbsp;&nbsp;&nbsp;Philemon Obed Obeng<br>&nbsp;&nbsp;&nbsp;Benjamine Asare<br>&nbsp;&nbsp;&nbsp;Evans Tetteh<br>&nbsp;&nbsp;&nbsp;Akwesi Frimpong<br><br>This is a terminal to send commands to the Argus bot...<br>Use 'help' to list available commands.</div>";
+                    "<div><br><br><br>Industrial Inspection Bot v1.0<br>Developed by ePIKK Robotics <br><br>Credits:<br>&nbsp;&nbsp;&nbsp;Philemon Obed Obeng<br>&nbsp;&nbsp;&nbsp;Benjamine Asare<br>&nbsp;&nbsp;&nbsp;Evans Tetteh<br>&nbsp;&nbsp;&nbsp;Akwesi Frimpong<br><br>Special Thanks:<br> &nbsp;&nbsp;&nbsp;Mr. Bright Ayasu (Project Supervisor)<br> &nbsp;&nbsp;&nbsp;Mr. William Asamoah (Technical Guidance)<br><br>This is a terminal to send commands to the Argus bot...<br>Use 'help' to list available commands.</div>";
             } else if (command === "clear") {
                 output.innerHTML = "";
             } else if (command === "mode") {
