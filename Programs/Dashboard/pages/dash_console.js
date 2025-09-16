@@ -358,4 +358,87 @@ sensors.forEach(s => {
 
 
     updateModeStatus();
+
+
+    // ====== ESP32 WEBSOCKET HOOK ======
+    let espSocket = null;
+
+    function connectToESP(ip = "ws://192.168.4.1:81/") {
+        printToConsole("Connecting to ESP32...");
+        espSocket = new WebSocket(ip);
+
+        espSocket.onopen = () => {
+            printToConsole("Connected to ESP32 WebSocket ✅");
+        };
+
+        espSocket.onmessage = (event) => {
+            try {
+                const data = JSON.parse(event.data);
+
+                // --- Example JSON from ESP32 ---
+                // {
+                //   "gas": { "co": 32, "ch4": 50, "lpg": 18, "airq": 72 },
+                //   "gps": { "lat": 7.351136, "lng": -2.341782 },
+                //   "ultrasonic": [120, 85, 200, 95, 60],
+                //   "battery": 87
+                // }
+
+                // ---- Update gas chart ----
+                if (data.gas) {
+                    const now = new Date().toLocaleTimeString();
+                    gasChart.data.labels.push(now);
+                    if (gasChart.data.labels.length > 10) gasChart.data.labels.shift();
+
+                    gasChart.data.datasets[0].data.push(data.gas.co);
+                    gasChart.data.datasets[1].data.push(data.gas.ch4);
+                    gasChart.data.datasets[2].data.push(data.gas.lpg);
+                    gasChart.data.datasets[3].data.push(data.gas.airq);
+
+                    gasChart.data.datasets.forEach(ds => {
+                        if (ds.data.length > 10) ds.data.shift();
+                    });
+                    gasChart.update();
+                }
+
+                // ---- Update GPS/map ----
+                if (data.gps) {
+                    botPosition.setLatLng([data.gps.lat, data.gps.lng]);
+                    map.panTo([data.gps.lat, data.gps.lng]);
+                }
+
+                // ---- Update ultrasonic wedges ----
+                if (data.ultrasonic) {
+                    const wedges = svg.querySelectorAll(".wedge");
+                    data.ultrasonic.forEach((d, i) => {
+                        const wedge = wedges[i];
+                        if (wedge) {
+                            wedge.setAttribute("fill", d < 30 ? "red" : "green");
+                            wedge.setAttribute("fill-opacity", 0.3);
+                        }
+                    });
+                }
+
+                // ---- Battery status to console ----
+                if (data.battery !== undefined) {
+                    printToConsole(`Battery: ${data.battery}%`);
+                }
+
+            } catch (err) {
+                console.error("Bad ESP32 data:", event.data);
+            }
+        };
+
+        espSocket.onclose = () => {
+            printToConsole("ESP32 WebSocket disconnected ❌");
+        };
+
+        espSocket.onerror = (err) => {
+            console.error("ESP32 WebSocket Error:", err);
+        };
+    }
+
+    // Hook the existing connect button to ESP WebSocket
+    connectBtn.addEventListener("click", function () {
+        connectToESP("ws://192.168.4.1:81/"); // Change IP if ESP is STA on your router
+    });
 });

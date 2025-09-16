@@ -169,7 +169,7 @@
 	(footprint "Package_DIP:DIP-16_W7.62mm"
 		(layer "F.Cu")
 		(uuid "0680d30b-74eb-409d-8525-2ae1bfff70a1")
-		(at 156.8 128.62 90)
+		(at 156.8 133 90)
 		(descr "16-lead though-hole mounted DIP package, row spacing 7.62mm (300 mils)")
 		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
 		(property "Reference" "U2"
@@ -549,7 +549,7 @@
 	(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
 		(layer "F.Cu")
 		(uuid "3585ef98-8ea1-4df0-8922-674bed923f9b")
-		(at 113.04 85.5 -90)
+		(at 111.775 85.5 -90)
 		(descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x02 2.54mm single row")
 		(property "Reference" "J5"
@@ -1946,7 +1946,7 @@
 	(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
 		(layer "F.Cu")
 		(uuid "6aa3b946-4b9c-4468-af8c-6f7648c5ae25")
-		(at 113.04 98.5 -90)
+		(at 111.775 98.5 -90)
 		(descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x02 2.54mm single row")
 		(property "Reference" "J2"
@@ -2211,7 +2211,7 @@
 	(footprint "Package_DIP:DIP-16_W7.62mm"
 		(layer "F.Cu")
 		(uuid "6c0556e6-543e-4a73-b22e-461388894a73")
-		(at 125.26 128.62 90)
+		(at 125.26 133 90)
 		(descr "16-lead though-hole mounted DIP package, row spacing 7.62mm (300 mils)")
 		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil")
 		(property "Reference" "U3"
@@ -3667,7 +3667,7 @@
 	(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
 		(layer "F.Cu")
 		(uuid "c5780679-c8c2-48a3-ae16-b385098a84a6")
-		(at 112.775 79 -90)
+		(at 111.51 79 -90)
 		(descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x02 2.54mm single row")
 		(property "Reference" "J7"
@@ -3932,7 +3932,7 @@
 	(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
 		(layer "F.Cu")
 		(uuid "ea6ad3fe-b6c5-4668-a25b-26044402c0f3")
-		(at 113 92 -90)
+		(at 111.735 92 -90)
 		(descr "Through hole straight pin header, 1x02, 2.54mm pitch, single row")
 		(tags "Through hole pin header THT 1x02 2.54mm single row")
 		(property "Reference" "J3"
@@ -4197,7 +4197,7 @@
 	(footprint "TerminalBlock_CUI:TerminalBlock_CUI_TB007-508-03_1x03_P5.08mm_Horizontal"
 		(layer "B.Cu")
 		(uuid "b7c2abdb-2f87-4021-b68c-2c0994c146bb")
-		(at 112.6425 117.62 -90)
+		(at 112.6425 123.84 -90)
 		(descr "Terminal Block CUI TB007-508-03, 3 pins, pitch 5.08mm, size 15.8x10.2mm, drill diameter 1.6mm, pad diameter 2.4mm, https://www.cuidevices.com/product/resource/tb007-508.pdf, script-generated using https://gitlab.com/kicad/libraries/kicad-footprint-generator/scripts/TerminalBlock_CUI")
 		(tags "THT Terminal Block CUI TB007-508-03 pitch 5.08mm size 15.8x10.2mm drill 1.6mm pad 2.4mm")
 		(property "Reference" "J12"
@@ -4600,13 +4600,14 @@
 		)
 	)
 	(gr_rect
-		(start 106.785126 75.025126)
-		(end 182.785126 132.025126)
+		(start 104.785126 75.025126)
+		(end 182.785126 138.025126)
 		(stroke
 			(width 0.2)
 			(type solid)
 		)
 		(fill no)
+		(locked yes)
 		(layer "Edge.Cuts")
 		(uuid "0964e770-0f26-4ebb-aedd-6d2e8981111c")
 	)

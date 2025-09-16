@@ -21,8 +21,8 @@
       )
     )
     (boundary
-      (path pcb 0  182785 -132025  106785 -132025  106785 -75025.1  182785 -75025.1
-            182785 -132025)
+      (path pcb 0  182785 -138025  104785 -138025  104785 -75025.1  182785 -75025.1
+            182785 -138025)
     )
     (via "Via[0-1]_1500:500_um")
     (rule
@@ -33,14 +33,14 @@
   )
   (placement
     (component "Package_DIP:DIP-16_W7.62mm"
-      (place U2 156800.000000 -128620.000000 front 90.000000 (PN L293D))
-      (place U3 125260.000000 -128620.000000 front 90.000000 (PN L293D))
+      (place U2 156800.000000 -133000.000000 front 90.000000 (PN L293D))
+      (place U3 125260.000000 -133000.000000 front 90.000000 (PN L293D))
     )
     (component Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical
-      (place J5 113040.000000 -85500.000000 front -90.000000 (PN motor2))
-      (place J2 113040.000000 -98500.000000 front -90.000000 (PN motor1))
-      (place J7 112775.000000 -79000.000000 front -90.000000 (PN motor2))
-      (place J3 113000.000000 -92000.000000 front -90.000000 (PN motor1))
+      (place J5 111775.000000 -85500.000000 front -90.000000 (PN motor2))
+      (place J2 111775.000000 -98500.000000 front -90.000000 (PN motor1))
+      (place J7 111510.000000 -79000.000000 front -90.000000 (PN motor2))
+      (place J3 111735.000000 -92000.000000 front -90.000000 (PN motor1))
     )
     (component Connector_PinHeader_2.54mm:PinHeader_1x17_P2.54mm_Vertical
       (place J6 121000.000000 -79880.000000 front 0.000000 (PN Conn_01x17_Pin))
@@ -55,7 +55,7 @@
       (place J4 150000.000000 -128000.000000 front -90.000000 (PN Conn_01x01_Pin))
     )
     (component "TerminalBlock_CUI:TerminalBlock_CUI_TB007-508-03_1x03_P5.08mm_Horizontal"
-      (place J12 112642.500000 -117620.000000 back 90.000000 (PN "power input"))
+      (place J12 112642.500000 -123840.000000 back 90.000000 (PN "power input"))
     )
   )
   (library
