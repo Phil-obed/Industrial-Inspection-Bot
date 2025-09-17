@@ -415,16 +415,33 @@ sensors.forEach(s => {
                 }
 
                 // ---- Update ultrasonic wedges ----
+                // ---- Update ultrasonic wedges ----
                 if (data.ultrasonic) {
                     const wedges = svg.querySelectorAll(".wedge");
                     data.ultrasonic.forEach((d, i) => {
                         const wedge = wedges[i];
                         if (wedge) {
-                            wedge.setAttribute("fill", d < 30 ? "red" : "green");
+                            const s = sensors[i];
+                            const startAngle = s.angle - s.fov/2;
+                            const endAngle   = s.angle + s.fov/2;
+
+                            // actual arc radius = min(measured distance, max_r)
+                            const r = Math.min(d / 100.0, s.max_r); // assuming ESP32 sends cm, convert to m
+
+                            const newPath = makeWedgePath(s.x, s.y, r, startAngle, endAngle);
+                            wedge.setAttribute("d", newPath);
+
+                            // Color fades from green → yellow → red
+                            let color = "green";
+                            if (d < 30) color = "red";
+                            else if (d < 100) color = "yellow";
+
+                            wedge.setAttribute("fill", color);
                             wedge.setAttribute("fill-opacity", 0.3);
                         }
                     });
                 }
+
 
                 // ---- Battery status to console ----
                 if (data.battery !== undefined) {
