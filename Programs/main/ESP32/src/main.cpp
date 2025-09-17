@@ -1,4 +1,4 @@
-/* Full integrated RTOS sketch for Argus Bot
+/* Full integrated RTOS sketch for Argus Bot (patched)
    - Ultrasonics (5)
    - Gas MQ9 / MQ135
    - GPS (TinyGPS++)
@@ -290,9 +290,7 @@ void thermalTask(void *pvParameters) {
   esp_task_wdt_add(NULL);
   float frame[32*24];
   for (;;) {
-    if (mlx.begin(MLX90640_I2CADDR_DEFAULT, &Wire)) {
-      // should already be initialized; safe-check
-    }
+    // Removed repeated mlx.begin() here — initialization already done in setup()
     if (mlx.getFrame(frame) == 0) {
       float sum = 0;
       float tmin = frame[0];
@@ -387,20 +385,26 @@ void avoidanceTask(void *pvParameters) {
     StaticJsonDocument<128> doc;
     doc["type"] = "avoidance";
     if (blockedFront) {
-      // choose side with more free space
-      float left = min(latestUltrasonic[1], latestUltrasonic[3]);
-      float right = min(latestUltrasonic[2], latestUltrasonic[4]);
+      // choose side with more free space (use max of respective sensors to bias toward freer side)
+      float left = max(latestUltrasonic[1], latestUltrasonic[3]);
+      float right = max(latestUltrasonic[2], latestUltrasonic[4]);
       if (left > right) {
         // turn left
         doc["decision"] = "turn_left";
         motorLeft(150); // steer/move small turn
+        currentMotion = "left";
+        currentSpeed = 150;
       } else {
         doc["decision"] = "turn_right";
         motorRight(150);
+        currentMotion = "right";
+        currentSpeed = 150;
       }
     } else {
       doc["decision"] = "go_forward";
       motorForward(190);
+      currentMotion = "forward";
+      currentSpeed = 190;
     }
 
     sendJson(doc);
@@ -415,7 +419,8 @@ void commandTask(void *pvParameters) {
   esp_task_wdt_add(NULL);
   char buf[128];
   for (;;) {
-    if (xQueueReceive(commandQueue, &buf, pdMS_TO_TICKS(100)) == pdTRUE) {
+    // NOTE: pass 'buf' (pointer) not '&buf'
+    if (xQueueReceive(commandQueue, buf, pdMS_TO_TICKS(100)) == pdTRUE) {
       String msg = String(buf);
       Serial.printf("CommandTask got: %s\n", msg.c_str());
       // attempt parse as JSON
@@ -430,22 +435,26 @@ void commandTask(void *pvParameters) {
             currentSpeed = 0;
           } else if (cmd == "forward") {
             int sp = j["speed"] | 200;
-            motorForward(constrain(sp, 0, 255));
+            sp = constrain(sp, 0, 255);
+            motorForward((uint8_t)sp);
             currentMotion = "forward";
             currentSpeed = sp;
           } else if (cmd == "back") {
             int sp = j["speed"] | 200;
-            motorBackward(constrain(sp, 0, 255));
+            sp = constrain(sp, 0, 255);
+            motorBackward((uint8_t)sp);
             currentMotion = "back";
             currentSpeed = sp;
           } else if (cmd == "left") {
             int sp = j["speed"] | 200;
-            motorLeft(constrain(sp, 0, 255));
+            sp = constrain(sp, 0, 255);
+            motorLeft((uint8_t)sp);
             currentMotion = "left";
             currentSpeed = sp;
           } else if (cmd == "right") {
             int sp = j["speed"] | 200;
-            motorRight(constrain(sp, 0, 255));
+            sp = constrain(sp, 0, 255);
+            motorRight((uint8_t)sp);
             currentMotion = "right";
             currentSpeed = sp;
           } else if (cmd == "goto") {
@@ -462,7 +471,8 @@ void commandTask(void *pvParameters) {
             // navigation control should be added (path planning + follow)
           } else if (cmd == "steer") {
             int angle = j["angle"] | 90;
-            setServoAngle(constrain(angle, 0, 180));
+            angle = constrain(angle, 0, 180);
+            setServoAngle(angle);
             currentSteering = angle;
           } else {
             Serial.printf("Unknown cmd: %s\n", cmd.c_str());
@@ -575,8 +585,9 @@ void setupWebSocket() {
       StaticJsonDocument<256> doc;
       doc["type"] = "status";
       doc["msg"] = "welcome";
-      serializeJson(doc, doc.as<String>());
-      server->textAll(serializeJson(doc)); // not ideal, but keep below simple
+      String out;
+      serializeJson(doc, out);
+      server->textAll(out);
     } else if (type == WS_EVT_DISCONNECT) {
       Serial.printf("WS client %u disconnected\n", client->id());
     } else if (type == WS_EVT_DATA) {
