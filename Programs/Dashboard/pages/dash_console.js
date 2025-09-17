@@ -206,16 +206,24 @@ setInterval(() => {
         });
     });
 
-    // ====== TERMINAL LOGIC ======
-    input.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-            const command = input.value.trim();
-            output.innerHTML +=
-                "<div><span class='prompt'>argus-bot: $</span> " + command + "</div>";
+// ====== TERMINAL LOGIC ======
+input.addEventListener("keydown", function (event) {
+    if (event.key === "Enter") {
+        const command = input.value.trim();
+        output.innerHTML +=
+            "<div><span class='prompt'>argus-bot: $</span> " + command + "</div>";
 
-            if (command === "help") {
-                output.innerHTML += `<div>
-<pre>
+        // ---- SEND command to ESP32 if connected ----
+        if (espSocket && espSocket.readyState === WebSocket.OPEN) {
+            espSocket.send(JSON.stringify({ cmd: command }));   // NEW
+        } else {
+            printToConsole("⚠️ ESP32 not connected, command not sent.");
+        }
+
+        // ---- Local handling (help, about, etc) ----
+        if (command === "help") {
+            output.innerHTML += `<div>
+                <pre>
 System / Info
 -------------
 help         -> Show this help menu
@@ -263,34 +271,34 @@ auto         -> Switch to autonomous mode
 reboot       -> Restart bot system
 shutdown     -> Safely power off
 </pre>
-</div>`;
-            } else if (command === "about") {
-                output.innerHTML +=
-                    "<div><br><br><br>Industrial Inspection Bot v1.0<br>Developed by ePIKK Robotics <br><br>Credits:<br>&nbsp;&nbsp;&nbsp;Philemon Obed Obeng<br>&nbsp;&nbsp;&nbsp;Benjamine Asare<br>&nbsp;&nbsp;&nbsp;Evans Tetteh<br>&nbsp;&nbsp;&nbsp;Akwesi Frimpong<br><br>Special Thanks:<br> &nbsp;&nbsp;&nbsp;Mr. Bright Ayasu (Project Supervisor)<br> &nbsp;&nbsp;&nbsp;Mr. William Asamoah (Technical Guidance)<br><br>This is a terminal to send commands to the Argus bot...<br>Use 'help' to list available commands.</div>";
-            } else if (command === "clear") {
-                output.innerHTML = "";
-            } else if (command === "mode") {
-                output.innerHTML += `<div>Current control mode: <b>${mode.toUpperCase()}</b></div>`;
-            } else if (command.startsWith("goto")) {
-                let coords = command.replace("goto", "").trim().split(",");
-                if (coords.length === 2) {
-                    let lat = parseFloat(coords[0]);
-                    let lng = parseFloat(coords[1]);
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        let to = L.latLng(lat, lng);
-                        generateCrookedRoute(botPosition.getLatLng(), to, "Go To");
-                    }
-                } else {
-                    output.innerHTML += `<div>Invalid format. Use: goto <lat,lng></div>`;
+            </div>`;
+        } else if (command === "about") {
+            output.innerHTML += "<div>Industrial Inspection Bot v1.0 ...</div>";
+        } else if (command === "clear") {
+            output.innerHTML = "";
+        } else if (command === "mode") {
+            output.innerHTML += `<div>Current control mode: <b>${mode.toUpperCase()}</b></div>`;
+        } else if (command.startsWith("goto")) {
+            let coords = command.replace("goto", "").trim().split(",");
+            if (coords.length === 2) {
+                let lat = parseFloat(coords[0]);
+                let lng = parseFloat(coords[1]);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    let to = L.latLng(lat, lng);
+                    generateCrookedRoute(botPosition.getLatLng(), to, "Go To");
                 }
-            } else if (command !== "") {
-                output.innerHTML += "<div>Command not found: " + command + "</div>";
+            } else {
+                output.innerHTML += `<div>Invalid format. Use: goto <lat,lng></div>`;
             }
-
-            input.value = "";
-            output.scrollTop = output.scrollHeight;
+        } else if (command !== "") {
+            output.innerHTML += "<div>Command not found: " + command + "</div>";
         }
-    });
+
+        input.value = "";
+        output.scrollTop = output.scrollHeight;
+    }
+});
+
 
     function updateModeStatus() {
         modeStatus.textContent = `MODE: ${mode.toUpperCase()}`;
