@@ -217,14 +217,22 @@ void ultrasonicTask(void *pvParameters) {
     StaticJsonDocument<256> doc;
     doc["type"] = "ultrasonic";
     JsonArray arr = doc.createNestedArray("dist");
-    for (int i=0;i<5;i++) arr.add(latestUltrasonic[i]);
+    for (int i = 0; i < 5; i++) {
+      arr.add(latestUltrasonic[i]);
+    }
 
+    // Debug print to Serial
+    serializeJson(doc, Serial);
+    Serial.println();
+
+    // Send to WebSocket
     sendJson(doc);
 
     esp_task_wdt_reset();
     vTaskDelay(pdMS_TO_TICKS(200)); // 5 Hz
   }
 }
+
 
 // Gas sensors: read ADCs and broadcast
 void gasTask(void *pvParameters) {
@@ -240,7 +248,7 @@ void gasTask(void *pvParameters) {
     latestGasMQ135 = (raw135 / (float)ADC_MAX) * 100.0;
     latestGasMQ9 = (raw9 / (float)ADC_MAX) * 100.0;
 
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["type"] = "gas";
     doc["mq135_pct"] = latestGasMQ135;
     doc["mq9_pct"] = latestGasMQ9;
@@ -265,7 +273,7 @@ void gpsTask(void *pvParameters) {
       latestLng = gps.location.lng();
       gpsHasFix = true;
 
-      StaticJsonDocument<128> doc;
+      JsonDocument doc;
       doc["type"] = "gps";
       doc["lat"] = latestLat;
       doc["lng"] = latestLng;
@@ -274,7 +282,7 @@ void gpsTask(void *pvParameters) {
       sendJson(doc);
     } else {
       // optional: send no-fix message occasionally
-      StaticJsonDocument<64> doc;
+      JsonDocument doc;
       doc["type"] = "gps";
       doc["fix"] = false;
       sendJson(doc);
@@ -320,9 +328,9 @@ void thermalTask(void *pvParameters) {
 
 // Motor task: accept direct commands through commandTask (commandTask will modify these globals),
 // and publish motor status periodically
-volatile uint8_t currentSpeed = 0;
-volatile String currentMotion = "stopped";
-volatile int currentSteering = 90; // degrees: 0..180
+uint8_t currentSpeed = 0;
+String currentMotion = "stopped";
+int currentSteering = 90; // degrees: 0..180
 
 void motorTask(void *pvParameters) {
   esp_task_wdt_add(NULL);
@@ -330,7 +338,7 @@ void motorTask(void *pvParameters) {
   // ensure PWM channels already setup in setup()
   for (;;) {
     // publish motor state periodically
-    StaticJsonDocument<128> doc;
+    JsonDocument doc;
     doc["type"] = "motor";
     doc["status"] = currentMotion;
     doc["speed"] = currentSpeed;
@@ -427,7 +435,7 @@ void commandTask(void *pvParameters) {
       StaticJsonDocument<256> j;
       DeserializationError err = deserializeJson(j, msg);
       if (!err) {
-        if (j.containsKey("cmd")) {
+        if (j["cmd"].is<String>()) {
           String cmd = j["cmd"].as<String>();
           if (cmd == "stop") {
             motorStop();
@@ -588,20 +596,29 @@ void setupWebSocket() {
       String out;
       serializeJson(doc, out);
       server->textAll(out);
+
+      Serial.print("➡️ Sent to dashboard: ");
+      Serial.println(out);
     } else if (type == WS_EVT_DISCONNECT) {
       Serial.printf("WS client %u disconnected\n", client->id());
-    } else if (type == WS_EVT_DATA) {
-      // data may be in 'data' buffer with length 'len'
-      String msg = String((char*)data).substring(0, len);
-      Serial.printf("From dash: %s\n", msg.c_str());
-      // push to command queue (copy into buffer)
-      if (commandQueue) {
-        char buf[128];
-        strncpy(buf, msg.c_str(), sizeof(buf)-1);
-        buf[sizeof(buf)-1] = 0;
-        xQueueSend(commandQueue, buf, 0);
-      }
-    }
+    } else if (type == WS_EVT_DATA && len > 0) {
+        String msg = String((char*)data).substring(0, len);
+
+        if (msg == "ping") return;  // ignore keep-alive pings from browser
+
+        Serial.printf("From dash: %s\n", msg.c_str());
+
+        Serial.print("📥 Received raw data: ");
+        Serial.println(msg);
+
+        // push to command queue (copy into buffer)
+        if (commandQueue) {
+            char buf[128];
+            strncpy(buf, msg.c_str(), sizeof(buf)-1);
+            buf[sizeof(buf)-1] = 0;
+            xQueueSend(commandQueue, buf, 0);
+        }
+        }
   });
 
   server.addHandler(&ws);

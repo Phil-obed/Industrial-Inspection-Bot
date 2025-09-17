@@ -371,12 +371,14 @@ sensors.forEach(s => {
     // ====== ESP32 WEBSOCKET HOOK ======
     let espSocket = null;
 
-    function connectToESP(ip = "ws://192.168.4.1:81/") {
+    function  connectToESP(ip = "ws://192.168.4.1/ws") {
         printToConsole("Connecting to ESP32...");
         espSocket = new WebSocket(ip);
 
         espSocket.onopen = () => {
             printToConsole("Connected to ESP32 WebSocket ✅");
+            console.log("✅ Connected to ESP32");
+
         };
 
         espSocket.onmessage = (event) => {
@@ -416,9 +418,10 @@ sensors.forEach(s => {
 
                 // ---- Update ultrasonic wedges ----
                 // ---- Update ultrasonic wedges ----
-                if (data.ultrasonic) {
+                if (data.type === "ultrasonic" && data.dist) {
+                    printToConsole(`Ultrasonic distances (cm): [${data.dist.join(", ")}]`);
                     const wedges = svg.querySelectorAll(".wedge");
-                    data.ultrasonic.forEach((d, i) => {
+                    data.dist.forEach((d, i) => {
                         const wedge = wedges[i];
                         if (wedge) {
                             const s = sensors[i];
@@ -464,6 +467,13 @@ sensors.forEach(s => {
 
     // Hook the existing connect button to ESP WebSocket
     connectBtn.addEventListener("click", function () {
-        connectToESP("ws://192.168.4.1:81/"); // Change IP if ESP is STA on your router
+        connectToESP("ws://192.168.4.1/ws"); // Change IP if ESP is STA on your router
     });
+
+    setInterval(() => {
+    if (espSocket && espSocket.readyState === WebSocket.OPEN) {
+        espSocket.send("ping");
+    }
+    }, 10000);
+
 });
