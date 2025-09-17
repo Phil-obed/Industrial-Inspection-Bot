@@ -435,4 +435,9 @@ body {
   height: 100%; 
   transform: translateX(3px); /* shift arcs to the right */
 }
-.wedge { fill: #ccc; opacity: 0.2; stroke: none; }
+.wedge { 
+  fill: #ccc; 
+  opacity: 0.2; 
+  stroke: none; 
+  transition: d 0.4s ease, fill 0.4s ease, opacity 0.4s ease;
+}
